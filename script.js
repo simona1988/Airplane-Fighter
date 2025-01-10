@@ -10,21 +10,7 @@ let airplanePosition = (containerWidth - airplaneWidth) / 2;
 airplane.style.left = `${airplanePosition}px`;
 
 let isGameOver = false;
-let secondsPassed = 0;
-let timerInterval;
-
-function startTimer() {
-    timerInterval = setInterval(() => {
-        if (!isGameOver) {
-            ++secondsPassed;
-            timerElement.textContent = secondsPassed;
-        }
-    }, 1000);
-}
-
-function stopTimer() {
-    clearInterval(timerInterval);
-}
+let score = 0;
 
 function moveAirplane(direction) {
     if (isGameOver) {
@@ -81,25 +67,26 @@ function moveObstacle(obstacle) {
         }
         obstaclePosition += 5;
         obstacle.style.top = `${obstaclePosition}px`;
+        if (obstaclePosition > gameContainer.offsetHeight) {
+            clearInterval(interval);
+            obstacle.remove();
+            ++score;
+            document.getElementById('score').textContent = score;
+        }
         if (checkCollision(airplane, obstacle)) {
             endGame();
             clearInterval(interval);
             obstacle.remove();
             return;
         }
-        if (obstaclePosition > gameContainer.offsetHeight) {
-            clearInterval(interval);
-            obstacle.remove();
-        }
     }, 50);
 }
 
 function endGame() {
     isGameOver = true;
-    stopTimer();
     const message = document.getElementById('game-over-message');
     message.style.display = 'block';
-    message.textContent = `Game over. Player score: ${secondsPassed} seconds.`;
+    message.textContent = `Game over. Obstacles avoided: ${score}`;
 }
 
 setInterval(() => {
@@ -107,5 +94,3 @@ setInterval(() => {
         createObstacle();
     }
 }, 2000);
-
-startTimer();
