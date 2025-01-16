@@ -28,21 +28,14 @@ function moveAirplane(direction) {
 moveLeftAirplane.addEventListener('click', () => moveAirplane('left'));
 moveRightAirplane.addEventListener('click', () => moveAirplane('right'));
 
-function checkCollision(airplane, obstacle) {
-    const airplaneTop = airplane.offsetTop;
-    const airplaneLeft = airplane.offsetLeft;
-    const airplaneRight = airplaneLeft + airplane.offsetWidth;
-    const airplaneBottom = airplaneTop + airplane.offsetHeight;
-    const obstacleTop = obstacle.offsetTop;
-    const obstacleLeft = obstacle.offsetLeft;
-    const obstacleRight = obstacleLeft + obstacle.offsetWidth;
-    const obstacleBottom = obstacleTop + obstacle.offsetHeight;
-
+function checkCollision(projectile, obstacle) {
+    projectile = projectile.getBoundingClientRect();
+    obstacle = obstacle.getBoundingClientRect();
     return !(
-        airplaneBottom < obstacleTop ||
-        airplaneTop > obstacleBottom ||
-        airplaneRight < obstacleLeft ||
-        airplaneLeft > obstacleRight
+        projectile.bottom < obstacle.top ||
+        projectile.top > obstacle.bottom ||
+        projectile.right < obstacle.left ||
+        projectile.left > obstacle.right
     );
 }
 
@@ -70,24 +63,65 @@ function moveObstacle(obstacle) {
         if (obstaclePosition > gameContainer.offsetHeight) {
             clearInterval(interval);
             obstacle.remove();
-            ++score;
-            document.getElementById('score').textContent = score;
         }
         if (checkCollision(airplane, obstacle)) {
             endGame();
             clearInterval(interval);
             obstacle.remove();
-            return;
         }
     }, 50);
+}
+
+function shootProjectile() {
+    const projectile = document.createElement('div');
+    projectile.classList.add('projectile');
+    projectile.style.left = `${airplanePosition + airplaneWidth / 2 - 5}px`;
+    projectile.style.top = `${gameContainer.offsetHeight - airplane.offsetHeight - 10}px`;
+    gameContainer.appendChild(projectile);
+    moveProjectile(projectile);
+}
+
+function moveProjectile(projectile) {
+    let projectilePosition = parseInt(projectile.style.top, 10);
+    const interval = setInterval(() => {
+        if (isGameOver) {
+            clearInterval(interval);
+            projectile.remove();
+            return;
+        }
+        projectilePosition -= 10;
+        projectile.style.top = `${projectilePosition}px`;
+        if (projectilePosition < 0) {
+            clearInterval(interval);
+            projectile.remove();
+            return;
+        }
+        const obstacles = document.querySelectorAll('.obstacle');
+        obstacles.forEach((obstacle) => {
+            if (checkCollision(projectile, obstacle)) {
+                clearInterval(interval);
+                projectile.remove();
+                obstacle.remove();
+                ++score;
+                document.getElementById('score').textContent = score;
+            }
+        });
+    }, 30);
 }
 
 function endGame() {
     isGameOver = true;
     const message = document.getElementById('game-over-message');
     message.style.display = 'block';
-    message.textContent = `Game over. Obstacles avoided: ${score}`;
+    message.textContent = `Game over. Obstacles destroyed: ${score}`;
 }
+
+document.addEventListener('keydown', (event) => {
+    if (event.code === 'Space' && !isGameOver) {
+        event.preventDefault();
+        shootProjectile();
+    }
+});
 
 setInterval(() => {
     if (!isGameOver) {
