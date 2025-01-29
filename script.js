@@ -1,3 +1,15 @@
+const PROJECTILE_SPEED = 10;
+const PROJECTILE_UPDATE_INTERVAL = 30;
+const MIN_PROJECTILE_POSITION = 0;
+const PROJECTILE_WIDTH = 5;
+const PROJECTILE_HEIGHT = 10;
+const OBSTACLE_SPEED = 5;
+const OBSTACLE_POSITION_UPDATE_INTERVAL = 50;
+const OBSTACLE_SIZE = 50;
+const MOVE_AMOUNT = 20;
+const OBSTACLE_SPAWN_INTERVAL = 2000;
+
+
 const airplane = document.getElementById('airplane');
 const moveLeftAirplane = document.getElementById('move-left');
 const moveRightAirplane = document.getElementById('move-right');
@@ -13,15 +25,14 @@ let isGameOver = false;
 let score = 0;
 
 function moveAirplane(direction) {
-    if (isGameOver) {
-        return;
+    if (isGameOver) return;
+    
+    if (direction === 'left' && airplanePosition - MOVE_AMOUNT >= 0) {
+        airplanePosition -= MOVE_AMOUNT;
+    } else if (direction === 'right' && airplanePosition + MOVE_AMOUNT <= containerWidth - airplaneWidth) {
+        airplanePosition += MOVE_AMOUNT;
     }
-    const moveAmount = 20;
-    if (direction === 'left' && airplanePosition - moveAmount >= 0) {
-        airplanePosition -= moveAmount;
-    } else if (direction === 'right' && airplanePosition + moveAmount <= containerWidth - airplaneWidth) {
-        airplanePosition += moveAmount;
-    }
+    
     airplane.style.left = `${airplanePosition}px`;
 }
 
@@ -40,12 +51,11 @@ function checkCollision(projectile, obstacle) {
 }
 
 function createObstacle() {
-    if (isGameOver) {
-        return;
-    }
+    if (isGameOver) return;
+    
     const obstacle = document.createElement('div');
     obstacle.classList.add('obstacle');
-    obstacle.style.left = `${Math.random() * (containerWidth - 50)}px`;
+    obstacle.style.left = `${Math.random() * (containerWidth - OBSTACLE_SIZE)}px`;
     gameContainer.appendChild(obstacle);
     moveObstacle(obstacle);
 }
@@ -58,25 +68,27 @@ function moveObstacle(obstacle) {
             obstacle.remove();
             return;
         }
-        obstaclePosition += 5;
+        obstaclePosition += OBSTACLE_SPEED;
         obstacle.style.top = `${obstaclePosition}px`;
+        
         if (obstaclePosition > gameContainer.offsetHeight) {
             clearInterval(interval);
             obstacle.remove();
         }
+        
         if (checkCollision(airplane, obstacle)) {
             endGame();
             clearInterval(interval);
             obstacle.remove();
         }
-    }, 50);
+    }, OBSTACLE_POSITION_UPDATE_INTERVAL);
 }
 
 function shootProjectile() {
     const projectile = document.createElement('div');
     projectile.classList.add('projectile');
-    projectile.style.left = `${airplanePosition + airplaneWidth / 2 - 5}px`;
-    projectile.style.top = `${gameContainer.offsetHeight - airplane.offsetHeight - 10}px`;
+    projectile.style.left = `${airplanePosition + airplaneWidth / 2 - PROJECTILE_WIDTH / 2}px`;
+    projectile.style.top = `${gameContainer.offsetHeight - airplane.offsetHeight - PROJECTILE_HEIGHT}px`;
     gameContainer.appendChild(projectile);
     moveProjectile(projectile);
 }
@@ -89,13 +101,15 @@ function moveProjectile(projectile) {
             projectile.remove();
             return;
         }
-        projectilePosition -= 10;
+        projectilePosition -= PROJECTILE_SPEED;
         projectile.style.top = `${projectilePosition}px`;
-        if (projectilePosition < 0) {
+        
+        if (projectilePosition < MIN_PROJECTILE_POSITION) {
             clearInterval(interval);
             projectile.remove();
             return;
         }
+        
         const obstacles = document.querySelectorAll('.obstacle');
         obstacles.forEach((obstacle) => {
             if (checkCollision(projectile, obstacle)) {
@@ -106,7 +120,7 @@ function moveProjectile(projectile) {
                 document.getElementById('score').textContent = score;
             }
         });
-    }, 30);
+    }, PROJECTILE_UPDATE_INTERVAL);
 }
 
 function endGame() {
@@ -127,4 +141,4 @@ setInterval(() => {
     if (!isGameOver) {
         createObstacle();
     }
-}, 2000);
+}, OBSTACLE_SPAWN_INTERVAL);
