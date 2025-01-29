@@ -39,14 +39,14 @@ function moveAirplane(direction) {
 moveLeftAirplane.addEventListener('click', () => moveAirplane('left'));
 moveRightAirplane.addEventListener('click', () => moveAirplane('right'));
 
-function checkCollision(projectile, obstacle) {
-    projectile = projectile.getBoundingClientRect();
-    obstacle = obstacle.getBoundingClientRect();
+function checkCollision(element1, element2) {
+    element1 = element1.getBoundingClientRect();
+    element2 = element2.getBoundingClientRect();
     return !(
-        projectile.bottom < obstacle.top ||
-        projectile.top > obstacle.bottom ||
-        projectile.right < obstacle.left ||
-        projectile.left > obstacle.right
+        element1.bottom < element2.top ||
+        element1.top > element2.bottom ||
+        element1.right < element2.left ||
+        element1.left > element2.right
     );
 }
 
