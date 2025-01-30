@@ -9,7 +9,6 @@ const OBSTACLE_SIZE = 50;
 const MOVE_AMOUNT = 20;
 const OBSTACLE_SPAWN_INTERVAL = 2000;
 
-
 const airplane = document.getElementById('airplane');
 const moveLeftAirplane = document.getElementById('move-left');
 const moveRightAirplane = document.getElementById('move-right');
@@ -29,7 +28,8 @@ function moveAirplane(direction) {
     
     if (direction === 'left' && airplanePosition - MOVE_AMOUNT >= 0) {
         airplanePosition -= MOVE_AMOUNT;
-    } else if (direction === 'right' && airplanePosition + MOVE_AMOUNT <= containerWidth - airplaneWidth) {
+    } else if (direction === 'right' && airplanePosition + MOVE_AMOUNT <= 
+            containerWidth - airplaneWidth) {
         airplanePosition += MOVE_AMOUNT;
     }
     
@@ -87,8 +87,10 @@ function moveObstacle(obstacle) {
 function shootProjectile() {
     const projectile = document.createElement('div');
     projectile.classList.add('projectile');
-    projectile.style.left = `${airplanePosition + airplaneWidth / 2 - PROJECTILE_WIDTH / 2}px`;
-    projectile.style.top = `${gameContainer.offsetHeight - airplane.offsetHeight - PROJECTILE_HEIGHT}px`;
+    projectile.style.left = `${airplanePosition + airplaneWidth / 2 - 
+        PROJECTILE_WIDTH / 2}px`;
+    projectile.style.top = `${gameContainer.offsetHeight - 
+        airplane.offsetHeight - PROJECTILE_HEIGHT}px`;
     gameContainer.appendChild(projectile);
     moveProjectile(projectile);
 }
