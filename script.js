@@ -22,17 +22,19 @@ airplane.style.left = `${airplanePosition}px`;
 
 let isGameOver = false;
 let score = 0;
+const obstacleIntervals = new Map();
+const projectileIntervals = new Map();
 
 function moveAirplane(direction) {
-    if (isGameOver) return;
-    
+    if (isGameOver) {
+        return;
+    }   
     if (direction === 'left' && airplanePosition - MOVE_AMOUNT >= 0) {
         airplanePosition -= MOVE_AMOUNT;
     } else if (direction === 'right' && airplanePosition + MOVE_AMOUNT <= 
             containerWidth - airplaneWidth) {
         airplanePosition += MOVE_AMOUNT;
-    }
-    
+    }   
     airplane.style.left = `${airplanePosition}px`;
 }
 
@@ -42,17 +44,16 @@ moveRightAirplane.addEventListener('click', () => moveAirplane('right'));
 function checkCollision(element1, element2) {
     element1 = element1.getBoundingClientRect();
     element2 = element2.getBoundingClientRect();
-    return !(
-        element1.bottom < element2.top ||
+    return !(element1.bottom < element2.top ||
         element1.top > element2.bottom ||
         element1.right < element2.left ||
-        element1.left > element2.right
-    );
+        element1.left > element2.right);
 }
 
 function createObstacle() {
-    if (isGameOver) return;
-    
+    if (isGameOver) {
+        return;
+    }  
     const obstacle = document.createElement('div');
     obstacle.classList.add('obstacle');
     obstacle.style.left = `${Math.random() * (containerWidth - OBSTACLE_SIZE)}px`;
@@ -66,31 +67,33 @@ function moveObstacle(obstacle) {
         if (isGameOver) {
             clearInterval(interval);
             obstacle.remove();
+            obstacleIntervals.delete(obstacle);
             return;
         }
         obstaclePosition += OBSTACLE_SPEED;
-        obstacle.style.top = `${obstaclePosition}px`;
-        
+        obstacle.style.top = `${obstaclePosition}px`;      
         if (obstaclePosition > gameContainer.offsetHeight) {
             clearInterval(interval);
             obstacle.remove();
-        }
-        
+            obstacleIntervals.delete(obstacle);
+        }       
         if (checkCollision(airplane, obstacle)) {
             endGame();
             clearInterval(interval);
             obstacle.remove();
+            obstacleIntervals.delete(obstacle);
         }
-    }, OBSTACLE_POSITION_UPDATE_INTERVAL);
+    }, OBSTACLE_POSITION_UPDATE_INTERVAL);   
+    obstacleIntervals.set(obstacle, interval);
 }
 
 function shootProjectile() {
     const projectile = document.createElement('div');
     projectile.classList.add('projectile');
-    projectile.style.left = `${airplanePosition + airplaneWidth / 2 - 
-        PROJECTILE_WIDTH / 2}px`;
-    projectile.style.top = `${gameContainer.offsetHeight - 
-        airplane.offsetHeight - PROJECTILE_HEIGHT}px`;
+    projectile.style.left = `${airplanePosition + airplaneWidth / 2 
+        - PROJECTILE_WIDTH / 2}px`;
+    projectile.style.top = `${gameContainer.offsetHeight - airplane.offsetHeight 
+        - PROJECTILE_HEIGHT}px`;
     gameContainer.appendChild(projectile);
     moveProjectile(projectile);
 }
@@ -101,28 +104,30 @@ function moveProjectile(projectile) {
         if (isGameOver) {
             clearInterval(interval);
             projectile.remove();
+            projectileIntervals.delete(projectile);
             return;
         }
         projectilePosition -= PROJECTILE_SPEED;
-        projectile.style.top = `${projectilePosition}px`;
-        
+        projectile.style.top = `${projectilePosition}px`;       
         if (projectilePosition < MIN_PROJECTILE_POSITION) {
             clearInterval(interval);
             projectile.remove();
+            projectileIntervals.delete(projectile);
             return;
-        }
-        
+        }       
         const obstacles = document.querySelectorAll('.obstacle');
         obstacles.forEach((obstacle) => {
             if (checkCollision(projectile, obstacle)) {
                 clearInterval(interval);
                 projectile.remove();
+                projectileIntervals.delete(projectile);
                 obstacle.remove();
                 ++score;
                 document.getElementById('score').textContent = score;
             }
         });
-    }, PROJECTILE_UPDATE_INTERVAL);
+    }, PROJECTILE_UPDATE_INTERVAL);   
+    projectileIntervals.set(projectile, interval);
 }
 
 function endGame() {
@@ -130,6 +135,16 @@ function endGame() {
     const message = document.getElementById('game-over-message');
     message.style.display = 'block';
     message.textContent = `Game over. Obstacles destroyed: ${score}`;
+    obstacleIntervals.forEach((interval, obstacle) => {
+        clearInterval(interval);
+        obstacle.remove();
+    });
+    projectileIntervals.forEach((interval, projectile) => {
+        clearInterval(interval);
+        projectile.remove();
+    });   
+    obstacleIntervals.clear();
+    projectileIntervals.clear();
 }
 
 document.addEventListener('keydown', (event) => {
