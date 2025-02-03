@@ -121,6 +121,8 @@ function moveProjectile(projectile) {
                 clearInterval(interval);
                 projectile.remove();
                 projectileIntervals.delete(projectile);
+                clearInterval(obstacleIntervals.get(obstacle));
+                obstacleIntervals.delete(obstacle);
                 obstacle.remove();
                 ++score;
                 document.getElementById('score').textContent = score;
