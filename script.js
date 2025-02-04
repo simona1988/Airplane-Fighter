@@ -13,7 +13,6 @@ const airplane = document.getElementById('airplane');
 const moveLeftAirplane = document.getElementById('move-left');
 const moveRightAirplane = document.getElementById('move-right');
 const gameContainer = document.getElementById('game-container');
-const timerElement = document.getElementById('timer');
 const containerWidth = gameContainer.offsetWidth;
 const airplaneWidth = airplane.offsetWidth;
 
@@ -31,8 +30,8 @@ function moveAirplane(direction) {
     }   
     if (direction === 'left' && airplanePosition - MOVE_AMOUNT >= 0) {
         airplanePosition -= MOVE_AMOUNT;
-    } else if (direction === 'right' && airplanePosition + MOVE_AMOUNT <= 
-            containerWidth - airplaneWidth) {
+    } else if (direction === 'right' && 
+            airplanePosition + MOVE_AMOUNT <= containerWidth - airplaneWidth) {
         airplanePosition += MOVE_AMOUNT;
     }   
     airplane.style.left = `${airplanePosition}px`;
@@ -128,7 +127,7 @@ function moveProjectile(projectile) {
                 document.getElementById('score').textContent = score;
             }
         });
-    }, PROJECTILE_UPDATE_INTERVAL);   
+    }, PROJECTILE_UPDATE_INTERVAL);  
     projectileIntervals.set(projectile, interval);
 }
 
