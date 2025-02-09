@@ -30,8 +30,10 @@ function moveAirplane(direction) {
     }   
     if (direction === 'left' && airplanePosition - MOVE_AMOUNT >= 0) {
         airplanePosition -= MOVE_AMOUNT;
-    } else if (direction === 'right' && 
-            airplanePosition + MOVE_AMOUNT <= containerWidth - airplaneWidth) {
+    } else if (
+        direction === 'right' && 
+        airplanePosition + MOVE_AMOUNT <= containerWidth - airplaneWidth
+    ) {
         airplanePosition += MOVE_AMOUNT;
     }   
     airplane.style.left = `${airplanePosition}px`;
